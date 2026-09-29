@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Startup plan: product links to social posts</title>
+<style>
+:root{--bg:#f2f5f7;--panel:#fff;--ink:#14212b;--mute:#5b6b78;--line:#d3dce3;--go:#0f766e;--warn:#b45309;--stop:#b42318;--todo:#94a3b0}
+@media(prefers-color-scheme:dark){:root{--bg:#10181f;--panel:#182430;--ink:#e6edf2;--mute:#9aabb8;--line:#2c3c4a;--go:#3fbfae;--warn:#e0a24a;--stop:#f0776b}}
+*{box-sizing:border-box}[hidden]{display:none!important}.wrap.one{grid-template-columns:1fr}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif}
+h1,h2,h3{font-family:"Iowan Old Style",Georgia,serif;font-weight:600;margin:0}
+header{padding:20px 24px 8px}h1{font-size:26px}header p{color:var(--mute);margin:4px 0 0;max-width:70ch}
+nav{display:flex;gap:8px;padding:8px 24px;flex-wrap:wrap;align-items:center}
+button,select{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+button:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--go);outline-offset:2px}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.wrap{display:grid;grid-template-columns:270px 1fr;gap:20px;padding:8px 24px 40px}
+@media(max-width:800px){.wrap{grid-template-columns:1fr}}
+.rail{position:sticky;top:8px;align-self:start;max-height:calc(100vh - 16px);overflow:auto}
+@media(max-width:800px){.rail{position:static;max-height:none}}
+.node{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:6px 4px;position:relative}
+.node:hover .lbl{text-decoration:underline}
+.dot{flex:none;width:16px;height:16px;border-radius:50%;background:var(--todo);border:3px solid var(--bg);box-shadow:0 0 0 2px var(--todo);z-index:1}
+.node::before{content:"";position:absolute;left:11px;top:-14px;height:28px;width:2px;background:var(--line)}
+.node:first-child::before{display:none}
+.s-go .dot{background:var(--go);box-shadow:0 0 0 2px var(--go)}.s-warn .dot{background:var(--warn);box-shadow:0 0 0 2px var(--warn)}.s-stop .dot{background:var(--stop);box-shadow:0 0 0 2px var(--stop)}
+.phase{color:var(--mute);font-size:13px;margin:12px 0 2px 30px;font-style:italic}
+.gate{margin:2px 0 2px 30px;font-size:12px;color:var(--mute);border-left:2px dashed var(--line);padding-left:8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:14px}
+.card h2{font-size:19px;display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.card h3{font-size:14px;color:var(--mute);margin:14px 0 4px;font-family:system-ui,sans-serif;font-weight:600}
+textarea{width:100%;min-height:64px;resize:vertical;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit}
+.crit{display:flex;gap:8px;align-items:flex-start;padding:3px 0}.crit input{margin-top:4px}
+.crit.fail span{color:var(--stop)}.crit.pass span{color:var(--go)}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+td input[type=number]{width:52px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:4px}
+.tbl{overflow-x:auto}.pri{font-weight:700}.small{color:var(--mute);font-size:13px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;background:var(--go)}
+@media(prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
+@media print{.rail,nav{display:none}.wrap{display:block}}
+</style></head><body>
+<header><h1>From product link to paying customer</h1>
+<p>One editable plan for the 14-stage startup journey. Idea: turn ecommerce product links into ready-to-publish social posts, first for small Shopify and Etsy sellers. Edits save in this browser.</p></header>
+<nav aria-label="Views"><button id="t-plan" class="on">Plan</button><button id="t-auto">Automations</button>
+<button id="exp">Export JSON</button><button id="rst">Reset</button><span class="small" id="prog"></span></nav>
+<div class="wrap" id="planView"><aside class="rail" id="rail" aria-label="Stage flow"></aside><main id="main"></main></div>
+<div class="wrap one" id="autoView" hidden><main id="autoMain"></main></div>
+<script>
+const KEY="startup-plan-v1";
+const S=[
+["Brainstorm","Idea","Product URL to posts for Instagram, Facebook, LinkedIn","Which niche? Is LinkedIn needed for sellers?",["3 ideas scored on pain, existing spend, reach, platform risk","One idea chosen with a one-sentence positioning"]],
+["Problem validation","Validate","First segment: small Shopify and Etsy sellers","How many post manually each week? What do they pay today?",["10-15 interviews done","6 of 10 post weekly and call it a chore","3 already pay for something similar"]],
+["Market research","Validate","Bottom-up sizing; buyer-intent keywords first","How many reachable active stores? Which terms show buying intent?",["10-20 buyer-intent phrases listed","Reachable store count estimated from a cited source"]],
+["Competitor analysis","Validate","Compare Predis.ai, Ocoya, Canva, Buffer, Shopify AI","Which gap do sellers confirm: quality, niche fit, flat pricing, or performance loop?",["Same 5 products run through each tool","One gap confirmed by at least 4 sellers"]],
+["Customer research","Validate","Segment by behavior, not personas","Which behavior segment feels the pain most?",["Segments written from real interviews","Exact seller wording captured for copy"]],
+["Business model and pricing","Model","Test a flat subscription with a clear product limit","Right price and limit? Cost per post?",["Cost per post measured on 20-30 real outputs","Two price points tested","3-5 pre-orders or paid pilots"]],
+["Budget and runway","Model","Decide on the conservative scenario, spend in stages","Cash available? Founder pay? Country costs?",["Runway 9+ months in conservative case","Stage spending caps set","Break-even customer count known"]],
+["Business plan and pitch","Model","Plan states only what evidence supports","Which sections still lack evidence?",["Every section has a source or is marked unproven","8-10 slide outline ready"]],
+["MVP","Build","Concierge first, then paste-URL semi-automation; Instagram and Facebook only","Scrape URLs or use Shopify/Etsy connection? Build myself or freelancer?",["Half of pilot sellers use 3+ posts in a week","Most posts published with minor edits","3+ sellers ask to continue"]],
+["Branding","Build","Name, wordmark, small palette, two fonts","Name available as domain, handles, trademark?",["Trademark and domain checked","Sellers remember and trust the name","Logo works at avatar size"]],
+["Website and landing page","Launch","One promise, one action, real before-and-after","Free posts offer or founding-member pre-order?",["Loads well on a phone","Signup form works end to end","Signup rate tracked per source"]],
+["SEO and content","Launch","2 guides and 1 comparison page from real questions","Which 5 topics can realistically rank?",["Pages indexed in Search Console","Each page has original evidence","At least a few signups from organic pages"]],
+["Leads and first customers","Grow","Hand-picked outreach with a scoped free pilot, then a paid offer","Is small-seller demand strong, or should agencies come first?",["100 well-matched prospects contacted","Reasons for no recorded","5+ paying customers"]],
+["Customer support","Grow","Answer by hand first, then AI over approved help articles","Which 10 questions repeat?",["Question log kept for 4 weeks","Human route on every AI reply","No made-up answers in weekly review"]],
+["Automation and scaling","Grow","Automate after the manual process is understood","Which automations pay back their upkeep?",["Each automation saves more time than it costs","Retention holds in months 2-3","Margin holds as volume grows"]]
+].map((r,i)=>({id:i,name:r[0],phase:r[1],decision:r[2],questions:r[3],crit:r[4].map(t=>({t,v:0})),status:"todo",notes:""}));
+const A=[
+["Welcome email and onboarding steps",5,5,5,3,"Rules"],
+["Weekly report: signups, usage, costs, churn",5,5,5,4,"Scheduled"],
+["Failure alerts for generation or publish errors",4,5,5,5,"Monitoring"],
+["Lead and interview contacts into tracking sheet",4,4,4,3,"Rules plus light AI"],
+["Support triage and draft replies",3,3,3,4,"AI, human review"],
+["Trial follow-up and renewal reminders",3,5,4,3,"Rules"],
+["Guide to social posts and email drafts",3,3,3,3,"AI, human edit"],
+["Product-link to post pipeline (core product)",5,3,2,5,"Product build"]
+].map(r=>({n:r[0],f:r[1],p:r[2],s:r[3],t:r[4],type:r[5],risk:r[3]}));
+let st;
+function load(){try{st=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+ if(!st||!st.S){st={S:JSON.parse(JSON.stringify(S)),A:JSON.parse(JSON.stringify(A))}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function state(x){const c=x.crit.filter(k=>k.v==1).length,f=x.crit.some(k=>k.v==2);return x.status}
+function rail(){let h="",last="";st.S.forEach(x=>{if(x.phase!=last){h+=`<div class="phase">${x.phase}</div>`;last=x.phase}
+ h+=`<button class="node s-${x.status}" data-i="${x.id}"><span class="dot"></span><span class="lbl">${esc(x.name)}</span></button>`;});
+ $("rail").innerHTML=h;
+ $("rail").querySelectorAll(".node").forEach(b=>b.onclick=()=>$("s"+b.dataset.i).scrollIntoView({behavior:"smooth"}));
+ const done=st.S.filter(x=>x.status=="go").length;$("prog").textContent=done+" of 14 stages passed"}
+function main(){$("main").innerHTML=`<div class="bar" aria-hidden="true"><i style="width:${st.S.filter(x=>x.status=="go").length/14*100}%"></i></div>`+st.S.map(x=>`
+<section class="card" id="s${x.id}"><h2><span>${x.id+1}. ${esc(x.name)}</span>
+<select data-k="status" data-i="${x.id}" aria-label="Status of ${esc(x.name)}"><option value="todo">Not started</option><option value="warn">In progress</option><option value="go">Passed</option><option value="stop">Failed, rethink</option></select></h2>
+<h3>Decision</h3><textarea data-k="decision" data-i="${x.id}">${esc(x.decision)}</textarea>
+<h3>Open question</h3><textarea data-k="questions" data-i="${x.id}">${esc(x.questions)}</textarea>
+<h3>Pass/fail criteria (click to cycle: open, pass, fail)</h3>
+${x.crit.map((k,j)=>`<label class="crit ${k.v==1?"pass":k.v==2?"fail":""}"><input type="checkbox" data-c="${x.id}.${j}" ${k.v?"checked":""}${k.v==2?" indeterminate":""}><span>${["Open: ","Pass: ","Fail: "][k.v]+esc(k.t)}</span></label>`).join("")}
+<h3>Evidence and notes</h3><textarea data-k="notes" data-i="${x.id}" placeholder="Interview counts, numbers, links">${esc(x.notes)}</textarea></section>`).join("");
+ document.querySelectorAll("select[data-k]").forEach(s=>{s.value=st.S[s.dataset.i].status;s.onchange=e=>{st.S[s.dataset.i].status=s.value;save();rail();main2()}});
+ document.querySelectorAll("textarea[data-k]").forEach(t=>t.oninput=()=>{st.S[t.dataset.i][t.dataset.k]=t.value;save()});
+ document.querySelectorAll("input[data-c]").forEach(c=>c.onclick=e=>{e.preventDefault();const[a,b]=c.dataset.c.split(".");const k=st.S[a].crit[b];k.v=(k.v+1)%3;save();const y=scrollY;main();scrollTo(0,y)});}
+function main2(){const y=scrollY;main();scrollTo(0,y)}
+function auto(){const sc=x=>x.f+x.p+x.s+x.t-x.risk*0+0;
+ const rows=st.A.map((x,i)=>({x,i,sc:(x.f+x.p+x.t)*2+(6-x.risk)*1})).sort((a,b)=>b.sc-a.sc);
+ $("autoMain").innerHTML=`<div class="card"><h2>Automation priority list</h2><p class="small">Rate 1-5. Score = (frequency + predictability + time saved) x 2 + (6 - risk). Automate the top rows first; leave anything with risk 4+ under human review.</p>
+<div class="tbl"><table><tr><th>Rank</th><th>Workflow</th><th>Type</th><th>Freq</th><th>Predict</th><th>Risk</th><th>Time saved</th><th>Score</th></tr>
+${rows.map((r,n)=>`<tr><td class="pri">${n+1}</td><td>${esc(r.x.n)}</td><td class="small">${esc(r.x.type)}</td>${["f","p","risk","t"].map(k=>`<td><input type="number" min="1" max="5" value="${r.x[k]}" data-a="${r.i}.${k}" aria-label="${k} for ${esc(r.x.n)}"></td>`).join("")}<td class="pri">${r.sc}</td></tr>`).join("")}</table></div></div>
+<div class="card"><h2>Workflow map</h2><p class="small">Manual first, then automate what repeats. Every AI step keeps a human checkpoint until the error rate is low.</p>
+<svg viewBox="0 0 760 210" width="100%" role="img" aria-label="Workflow from signup to scaling" style="max-width:760px">
+<defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L8,4L0,8z" fill="var(--mute)"/></marker></defs>
+${[["Landing page","signup form",10,20],["Welcome email","rules",200,20],["Product links in","pilot batch",390,20],["Generate posts","AI + template",580,20],["Human review","edit or approve",580,120],["Publish or export","seller gets posts",390,120],["Usage and cost log","alerts on failure",200,120],["Weekly report","you decide",10,120]].map(n=>`<g><rect x="${n[2]}" y="${n[3]}" width="170" height="56" rx="6" fill="var(--panel)" stroke="var(--line)"/><text x="${n[2]+10}" y="${n[3]+24}" fill="var(--ink)" font-size="14" font-weight="600">${n[0]}</text><text x="${n[2]+10}" y="${n[3]+43}" fill="var(--mute)" font-size="12">${n[1]}</text></g>`).join("")}
+<g stroke="var(--mute)" stroke-width="1.5" marker-end="url(#ar)" fill="none"><path d="M180 48H198"/><path d="M370 48H388"/><path d="M560 48H578"/><path d="M665 76V118"/><path d="M578 148H562"/><path d="M388 148H372"/><path d="M198 148H182"/></g>
+<text x="10" y="200" fill="var(--mute)" font-size="12">Support questions and edit rates from the weekly report feed the next product fix.</text></svg></div>`;
+ document.querySelectorAll("input[data-a]").forEach(i=>i.onchange=()=>{const[a,k]=i.dataset.a.split(".");st.A[a][k]=Math.min(5,Math.max(1,+i.value||1));save();auto()})}
+function tab(v){$("planView").hidden=v!="plan";$("autoView").hidden=v!="auto";$("t-plan").className=v=="plan"?"on":"";$("t-auto").className=v=="auto"?"on":"";if(v=="auto")auto()}
+$("t-plan").onclick=()=>tab("plan");$("t-auto").onclick=()=>tab("auto");
+$("exp").onclick=()=>{const b=new Blob([JSON.stringify(st,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="startup-plan.json";a.click()};
+$("rst").onclick=()=>{if(confirm("Reset all edits?")){try{localStorage.removeItem(KEY)}catch(e){}load();rail();main();auto()}};
+load();rail();main();
+</script></body></html>
